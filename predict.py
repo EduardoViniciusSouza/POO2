@@ -1,4 +1,5 @@
 # src/predict.py
+import os
 import cv2
 import numpy as np
 from tensorflow.keras.models import load_model
@@ -25,5 +26,39 @@ lb = LabelBinarizer()
 
 lb.fit(['healthy', 'rust']);
 # Exemplo de uso
-result = predict_image(model, 'healthySoy.JPG', lb)
-print(f'A imagem é: {result}')
+
+caminhoPastaDoentes = 'predict/doentes'
+caminhoPastaSaudavel = 'predict/saudaveis'
+rustPredictResults = []
+healthyPredictResults = []
+
+for item in os.listdir(caminhoPastaDoentes):
+    item_path = os.path.join(caminhoPastaDoentes, item)
+    resultRust = predict_image(model, item_path, lb)
+    rustPredictResults.append(resultRust[0])
+
+for item in os.listdir(caminhoPastaSaudavel):
+    item_path = os.path.join(caminhoPastaSaudavel, item)
+    resultHealthy = predict_image(model, item_path, lb)
+    healthyPredictResults.append(resultHealthy[0])
+
+qtdAcertos = 0
+qtdErros = 0
+
+for i in range(len(rustPredictResults)):
+    if rustPredictResults[i] == 'rust':
+        qtdAcertos += 1
+    else:
+        qtdErros += 1
+
+for i in range(len(healthyPredictResults)):
+    if healthyPredictResults[i] == 'healthy':
+        qtdAcertos += 1
+    else:
+        qtdErros += 1
+
+print(f'Quantidade de imagens corretas: {qtdAcertos}')
+print(f'Quantidade de imagens erradas: {qtdErros}')
+
+print('Rust predict results: ', rustPredictResults)
+print('Healthy predict results: ', healthyPredictResults)
